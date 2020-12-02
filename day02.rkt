@@ -18,7 +18,7 @@
   (and (letter-count . >= . from)
        (letter-count . <= . to)))
 
-(count valid? (file->lines "inputs/day2.txt"))
+(count valid? (file->lines "inputs/day02.txt"))
 
 ;; part 2
 
@@ -33,4 +33,4 @@
   (xor (eq? letter (letter-at ind1))
        (eq? letter (letter-at ind2))))
 
-(count valid2? (file->lines "inputs/day2.txt"))
+(count valid2? (file->lines "inputs/day02.txt"))

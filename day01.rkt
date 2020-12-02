@@ -4,7 +4,7 @@
 
 ;; part 1
 
-(define nums (map string->number (file->lines "inputs/day1.txt")))
+(define nums (map string->number (file->lines "inputs/day01.txt")))
 
 (for*/first ((i nums)
              (j nums)
