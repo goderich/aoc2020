@@ -15,8 +15,7 @@
   (define letter (car (string->list (second inputs))))
   (define password (third inputs))
   (define letter-count (count (curry eq? letter) (string->list password)))
-  (and (letter-count . >= . from)
-       (letter-count . <= . to)))
+  (<= from letter-count to))
 
 (count valid? (file->lines "inputs/day02.txt"))
 
@@ -28,9 +27,9 @@
   (define ind2 (string->number (second (string-split (first inputs) "-"))))
   (define letter (car (string->list (second inputs))))
   (define pass-chars (string->list (third inputs)))
-  (define (letter-at i)
-    (list-ref pass-chars (sub1 i)))
-  (xor (eq? letter (letter-at ind1))
-       (eq? letter (letter-at ind2))))
+  (define (valid-letter? i)
+    (eq? letter (list-ref pass-chars (sub1 i))))
+  (xor (valid-letter? ind1)
+       (valid-letter? ind2)))
 
 (count valid2? (file->lines "inputs/day02.txt"))
