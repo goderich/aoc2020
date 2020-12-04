@@ -40,6 +40,7 @@
       (repeat/p 6
                 (or/p digit/p
                       (char-between/p #\a #\f)))
+      eof/p
       (pure 'ok)))
 
 (define pid/p
