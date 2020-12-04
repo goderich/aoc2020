@@ -38,8 +38,13 @@
 (define hcl/p
   (do (char/p #\#)
       (repeat/p 6
-       (or/p digit/p
-             (char-between/p #\a #\f)))
+                (or/p digit/p
+                      (char-between/p #\a #\f)))
+      (pure 'ok)))
+
+(define pid/p
+  (do (repeat/p 9 digit/p)
+      eof/p
       (pure 'ok)))
 
 (define (valid2? str)
@@ -48,14 +53,13 @@
   (for/and ((fld fields))
     (define value (second fld))
     (match (first fld)
-      ("byr" (>= 2002 (string->number (second fld)) 1920))
-      ("iyr" (>= 2020 (string->number (second fld)) 2010))
-      ("eyr" (>= 2030 (string->number (second fld)) 2020))
+      ("byr" (>= 2002 (string->number value) 1920))
+      ("iyr" (>= 2020 (string->number value) 2010))
+      ("eyr" (>= 2030 (string->number value) 2020))
       ("hgt" (valid-hgt? value))
       ("hcl" (success? (parse-string hcl/p value)))
       ("ecl" (member value '("amb" "blu" "brn" "gry" "grn" "hzl" "oth")))
-      ("pid" (and (= 9 (string-length value))
-                  (for/and ((c (in-string value))) (char-numeric? c))))
+      ("pid" (success? (parse-string pid/p value)))
       ("cid" #t))))
 
 (count valid2? part1-list)
