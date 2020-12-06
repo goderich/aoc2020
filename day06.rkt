@@ -17,7 +17,7 @@
 
 ;; part 2
 ;;
-;; Here we will use the intersections of sets to determine
+;; Here we will use intersections of sets to determine
 ;; which letters appear on every line of a group. Due to
 ;; the way set-intersect works in Racket, the first set
 ;; has to be the complete alphabet. Since we're using it
@@ -28,7 +28,7 @@
 
 ;; We use two nested folds. The inner fold counts the
 ;; number of chars that occur on every line of a group.
-;; We outer fold sums up the results to give us the answer.
+;; The outer fold sums up the results to give us the answer.
 ;; Note that the set-intersect function can be used on
 ;; lists directly.
 (for/sum ((group groups))
