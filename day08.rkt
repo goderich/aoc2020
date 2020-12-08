@@ -20,11 +20,14 @@
 
 ;; This is where the magic happens. This function is
 ;; generalized for both parts of the puzzle.
+;; The embedded `loop` function does all the work,
+;; while the `run-instructions` function simply presents
+;; a clean interface.
 ;; `acc` is the running tally of the accumulator value.
 ;; `ran` is the set of lines that we already ran before.
 ;; `linenum` is the current line number (duh).
 ;; `instr` is the hash map of instructions
-;; (we need it as a parameter for part 2).
+;; (we need it as a variable for part 2).
 ;; If the instructions terminate successfully, it returns
 ;; a Success value. If they go into a loop, it returns a
 ;; Failure value. Both also carry the value of `acc` at
@@ -32,25 +35,24 @@
 ;; data/either).
 ;; If none of the above apply, it goes into a recursive
 ;; call based on the current instruction.
-(define (run-instructions-rec acc ran linenum instr)
-  (cond
-    ((linenum . >= . (hash-count instr)) (success acc))
-    ((set-member? ran linenum) (failure acc))
-    (else
-     (define ops (hash-ref instr linenum))
-     (define op (car ops))
-     (define val (cdr ops))
-     (match op
-       ("nop" (run-instructions-rec acc (set-add ran linenum) (add1 linenum) instr))
-       ("acc" (run-instructions-rec (+ acc val) (set-add ran linenum) (add1 linenum) instr))
-       ("jmp" (run-instructions-rec acc (set-add ran linenum) (+ val linenum) instr))))))
-
 ;; Since we always use the same values of `acc`, `ran`,
-;; and `linenum` for the initial call of run-instructions-rec,
-;; we can use a wrapper function to make it simpler and
-;; more readable.
+;; and `linenum` for the initial call of the loop,
+;; we can embed it in a wrapper function to make it simpler
+;; to use and its funcalls more readable.
 (define (run-instructions lst)
-  (run-instructions-rec 0 '() 0 lst))
+  (define (loop acc ran linenum instr)
+    (cond
+      ((linenum . >= . (hash-count instr)) (success acc))
+      ((set-member? ran linenum) (failure acc))
+      (else
+       (define ops (hash-ref instr linenum))
+       (define op (car ops))
+       (define val (cdr ops))
+       (match op
+         ("nop" (loop acc (set-add ran linenum) (add1 linenum) instr))
+         ("acc" (loop (+ acc val) (set-add ran linenum) (add1 linenum) instr))
+         ("jmp" (loop acc (set-add ran linenum) (+ val linenum) instr))))))
+  (loop 0 '() 0 lst))
 
 ;; Part 1
 ;;
