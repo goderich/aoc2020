@@ -26,8 +26,6 @@
 ;; `acc` is the running tally of the accumulator value.
 ;; `ran` is the set of lines that we already ran before.
 ;; `linenum` is the current line number (duh).
-;; `instr` is the hash map of instructions
-;; (we need it as a variable for part 2).
 ;; If the instructions terminate successfully, it returns
 ;; a Success value. If they go into a loop, it returns a
 ;; Failure value. Both also carry the value of `acc` at
@@ -39,20 +37,23 @@
 ;; and `linenum` for the initial call of the loop,
 ;; we can embed it in a wrapper function to make it simpler
 ;; to use and its funcalls more readable.
+;; Moreover, `loop` is a closure, so we don't need to
+;; pass the `lst` variable to it directly, but `loop` can still
+;; access it.
 (define (run-instructions lst)
-  (define (loop acc ran linenum instr)
+  (define (loop acc ran linenum)
     (cond
-      ((linenum . >= . (hash-count instr)) (success acc))
+      ((linenum . >= . (hash-count lst)) (success acc))
       ((set-member? ran linenum) (failure acc))
       (else
-       (define ops (hash-ref instr linenum))
+       (define ops (hash-ref lst linenum))
        (define op (car ops))
        (define val (cdr ops))
        (match op
-         ("nop" (loop acc (set-add ran linenum) (add1 linenum) instr))
-         ("acc" (loop (+ acc val) (set-add ran linenum) (add1 linenum) instr))
-         ("jmp" (loop acc (set-add ran linenum) (+ val linenum) instr))))))
-  (loop 0 '() 0 lst))
+         ("nop" (loop acc (set-add ran linenum) (add1 linenum)))
+         ("acc" (loop (+ acc val) (set-add ran linenum) (add1 linenum)))
+         ("jmp" (loop acc (set-add ran linenum) (+ val linenum)))))))
+  (loop 0 '() 0))
 
 ;; Part 1
 ;;
