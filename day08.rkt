@@ -46,9 +46,7 @@
       ((linenum . >= . (hash-count lst)) (success acc))
       ((set-member? ran linenum) (failure acc))
       (else
-       (define ops (hash-ref lst linenum))
-       (define op (car ops))
-       (define val (cdr ops))
+       (match-define (cons op val) (hash-ref lst linenum))
        (match op
          ("nop" (loop acc (set-add ran linenum) (add1 linenum)))
          ("acc" (loop (+ acc val) (set-add ran linenum) (add1 linenum)))
