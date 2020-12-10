@@ -17,8 +17,10 @@
          (cons max-joltage)
          (sort _ <))))
 
-;; A simple way to calculate intermediate distances is by clipping the
-;; first and last elements and mapping subtraction to the resulting lists.
+;; A simple way to calculate intermediate distances is by using two lists,
+;; one with the first element clipped and the other with the final element
+;; clipped. We can then map subtraction to the two lists to get the distances
+;; between adjacent elements of the initial list.
 (define distances
   (map -
        (rest jolts)
@@ -51,6 +53,9 @@
 ;; Moreover, we don't even need the streaks themselves, but just their
 ;; lengths. The function below calculates the lengths of streaks of
 ;; consecutive 1s in the distances list.
+;; (NB: we don't even need to reverse the list in the end, because we'll
+;; be calculating its product later, but I still chose to do it for
+;; propriety's sake.)
 (define (consecutive-ones lst)
   (for/fold ((num-ones 0)
              (acc '())
