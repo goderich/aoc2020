@@ -72,8 +72,8 @@
 (define (numpaths len)
   (add1 (apply + (range len))))
 
-;; The product of all separate streaks is the total number of paths, and
-;; thus the answer.
+;; The product of the number of paths in each separate streak is the total
+;; number of paths, and thus the answer.
 (~>> distances
      (consecutive-ones)
      (map numpaths)
