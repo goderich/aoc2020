@@ -67,10 +67,16 @@
       (else (values 0 (cons num-ones acc))))))
 
 ;; To find out the number of paths in a streak of 1-jolt distances, we
-;; use this formula: 1 + (sum from 0 to (n - 1)), where n is the length of
-;; the streak.
+;; use the Tribonacci sequence, where the next number in the sequence is
+;; the sum of the previous three numbers: 0, 1, 1, 2, 4, 7, 13, 24, etc.
+;; However there are only sequences with length up to 4 in the puzzle, so
+;; we can hardcode it here to save ourselves the trouble.
 (define (numpaths len)
-  (add1 (apply + (range len))))
+  (match len
+    (1 1)
+    (2 2)
+    (3 4)
+    (4 7)))
 
 ;; The product of the number of paths in each separate streak is the total
 ;; number of paths, and thus the answer.
