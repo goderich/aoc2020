@@ -11,7 +11,7 @@
    (map string->number)))
 
 ;; We make a hash map containing all but one of the numbers in the input as keys,
-;; with their latest indices as values. This serves as the initial value of the dict
+;; with their indices as values. This serves as the initial value of the dict
 ;; variable in the main loop below.
 (define dict-init
   (for/hasheq ((k (drop-right input 1))
@@ -22,6 +22,8 @@
 ;; At each step, we check if the newest number already exists in the dict, and
 ;; calculate the next number according to the rules.
 ;; We start by running the last item of the input through the rules.
+;; The hash map is updated each step with the newest item being the key,
+;; and the current index its value. Keys only hold a single value in this hash map.
 ;; The loop terminates according to a given value N, which will output the Nth
 ;; number of the sequence.
 (define (nth-number n)
