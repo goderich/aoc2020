@@ -39,7 +39,7 @@
 
 ;; We parse all input lines and save them to a variable to be used with
 ;; both part 1 and part 2. Megaparsack is quite powerful, but it is slow,
-;; so it's a good idea to parse the input only one time.
+;; so it's a good idea to parse the input only once.
 (define inputs
   (for/list ((line (file->lines "inputs/day18.txt")))
     (from-success #f (parse-string expression/p line))))
@@ -58,7 +58,7 @@
      (op num (eval-inner-part1 (drop-right lst 2))))))
 
 ;; This function is abstracted for use with both part 1 and part 2. It simply
-;; checks if there are any lists in lst and recursively calls INNER-F on them
+;; checks if there are any lists in LST and recursively calls INNER-F on them
 ;; until they are all evaluated, finally calling INNER-F one last time on the
 ;; remaining list.
 (define (eval-exp inner-f lst)
@@ -87,7 +87,10 @@
 (define (eval-inner-part2 input)
   (for/fold ((acc '())
              (curr-lst '())
-             #:result (apply * (map (curry apply +) (cons curr-lst acc))))
+             #:result (~>> acc
+                           (cons curr-lst)
+                           (map (curry apply +))
+                           (apply *)))
             ((item input)
              #:when (not (eq? item +)))
     (cond
