@@ -2,60 +2,69 @@
 
 (require threading)
 
-(define (parse-line str)
-  (match-define (list word-str allergen-str) (string-split str "(contains "))
-  (define words (string-split word-str))
-  (define allergens
-    (~>> allergen-str
-         (substring _ 0 (sub1 (string-length allergen-str)))
+(define (parse-foreign line)
+  (~>> line
+       (string-split _ "(contains ")
+       (first)
+       (string-split)))
+
+(define (parse-allergens line)
+    (~>> line
+         (string-split _ "(contains ")
+         (second)
+         (string-trim _ ")")
          (string-split _ ", ")))
-  (values allergens words))
+
+(define allergen-dict
+  (for*/fold ((dict (make-immutable-hash)))
+             ((line (file->lines "inputs/day21.txt"))
+              (allergen (parse-allergens line)))
+    (define foreign (parse-foreign line))
+    (if (hash-has-key? dict allergen)
+        (hash-update dict allergen (lambda (v) (set-intersect v foreign)))
+        (hash-set dict allergen foreign))))
+
+(define allergens
+  (~>> allergen-dict
+       (hash-values)
+       (flatten)
+       (remove-duplicates)))
 
 (define words
-  (flatten
-   (for/list ((line (file->lines "inputs/day21.txt")))
-     (~>> line
-          (string-split _ "(contains")
-          (first)
-          (string-split)))))
+  (~>> "inputs/day21.txt"
+       (file->lines)
+       (map parse-foreign)
+       (flatten)))
 
-(define lines
-  (for/hash ((line (file->lines "inputs/day21.txt")))
-    (parse-line line)))
+(count (λ (word) (not (member word allergens))) words)
 
-(define d
-  (for*/fold ((dict (make-immutable-hash)))
-             (((alls wds) lines)
-              (all alls))
-    (if (hash-has-key? dict all)
-        (hash-update dict all (lambda (v) (set-intersect v wds)))
-        (hash-set dict all wds))))
+;; Part 2
+;;
+(define (remove-from-dict dict singleton)
+  (for/hash (((key val) dict))
+    (values
+     key
+     (if (not (list? val))
+         val
+         (remove singleton val)))))
 
-(define allergens (remove-duplicates (flatten (hash-values d))))
+(define (prune-candidates dict)
+  (define new-dict
+    (for/first (((key val) dict)
+                #:when (and (list? val)
+                            (= 1 (length val))))
+      (define singleton (car val))
+      (remove-from-dict
+       (hash-set dict key singleton)
+       singleton)))
+  (cond
+    ((false? new-dict) dict)
+    (else (prune-candidates new-dict))))
 
-(for/fold ((acc 0))
-          ((word words)
-           #:unless (member word allergens))
-  (add1 acc))
+(define translations
+  (prune-candidates allergen-dict))
 
-(define (calc-alls dict)
-  (for/first (((k v) dict)
-              ((k2 v2) dict)
-              #:when (for/and ((all v))
-                       (member all v2)))
-  (hash-set dict k2 (set-subtract v2 v))
-  ))
-
-;; '#hash(("dairy" . ("tsqpn" "zqzmzl" "rcqb"))
-;;        ("eggs" . ("cltx" "rcqb"))
-;;        ("fish" . ("nrl"))
-;;        ("nuts" . ("qjvvcvz"))
-;;        ("peanuts" . ("xhnk" "tsqpn" "cltx" "tfqsb"))
-;;        ("sesame" . ("xhnk" "tsqpn"))
-;;        ("shellfish" . ("zqzmzl" "tfqsb" "rcqb" "cltx"))
-;;        ("wheat" . ("zqzmzl" "xhnk")))
-
-;; (~>>
-;; "zqzmzl"
-;;  '("cltx" "nrl" "qjvvcvz" "tfqsb" "tsqpn" "rcqb" "xhnk")
-;;  (string-join _ ","))
+(~>>
+ (for/list ((allergen (sort (hash-keys translations) string<?)))
+   (hash-ref translations allergen))
+ (string-join _ ","))
