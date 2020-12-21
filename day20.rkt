@@ -1,8 +1,11 @@
 #lang racket
 
-;; WARNING !!! SPAGHETTI BELOW !!!
-;; This code should not be read for fear of blindness and/or insanity.
-;; I'm provisionally uploading it to GitHub, but I will be back to retouch it a bit.
+;; This one was tough, mostly because I wanted to write a purely functional
+;; solution, but in the end went with mutable dicts for part 1, since that
+;; was a lot more straightforward. In retrospect, perhaps I should not have
+;; resisted so much, falling into the trap of using only a single paradigm
+;; where Racket has many to offer. The morale of the story is: prefer pure
+;; functions whenever possible, but do use mutation when necessary.
 (require threading)
 
 ;; Part 1
@@ -140,7 +143,11 @@
 (apply * (map (curry hash-ref coords) corner-coords))
 
 ;; Part 2
+;;
+;; We've already done the hard part above (finding the correct ordering of
+;; the tiles), so now all that's left is just routine work.
 
+;; Helper function for below.
 (define (remove-borders tile)
   (~>> tile
        (rest)
@@ -148,16 +155,24 @@
        (map rest)
        (map (λ (row) (drop-right row 1)))))
 
+;; Instead of constructing the picture right away, we use an intermediate
+;; stage to simplify the code a little bit. In this stage we create a flat
+;; list of tiles in the correct order with their borders removed.
+;; [NB. Because we used a Cartesian y above, we count downwards for y here.]
 (define ordered-tiles
   (for*/list ((y (in-range max-y (sub1 min-y) -1))
               (x (in-range min-x (add1 max-x))))
     (remove-borders (hash-ref tiles (hash-ref coords (cons x y))))))
 
+;; Then we group the ordered tiles by 12, and stitch their rows together to
+;; create the full picture.
 (define picture
   (for*/list ((row (in-slice 12 ordered-tiles))
               (y (in-range (length (car ordered-tiles)))))
     (apply append (map (λ (lst) (list-ref lst y)) row))))
 
+;; The sea monster is represented as three lists of coordinates of # characters.
+;; I also tried using regexes, and it works, but this is much faster.
 (define sea-monster
   (~>>
    '("..................#."
@@ -166,6 +181,9 @@
    (map string->list)
    (map (λ (lst) (indexes-of lst #\#)))))
 
+;; Return the number of monsters in GRID. We travel each pixel, carefully
+;; avoiding the edges, and check that all # characters are where we expect
+;; them to be.
 (define (check-for-monsters grid)
   (for*/fold ((acc 0))
              ((row (in-range ((length grid) . - . 3)))
@@ -178,6 +196,9 @@
         (add1 acc)
         acc)))
 
+;; The picture can also be rotated and flipped, but luckily only one orientation
+;; has any monsters on it, so we can iterate until we start getting them, and
+;; then calculate the answer to part 2.
 (for/first ((rot (rotations picture))
             #:when (positive? (check-for-monsters rot)))
   (define length-of-monster
