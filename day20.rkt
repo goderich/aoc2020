@@ -29,7 +29,7 @@
   (cons tilenum tilechars))
 
 ;; We read the input and construct a mutable hash map with tile nums as
-;; the keys, as tile grids (lists of lists of chars) as their values. We
+;; the keys, and tile grids (lists of lists of chars) as their values. We
 ;; will be mutating the values later.
 (define tiles
   (~>>
@@ -70,7 +70,7 @@
 ;; of all tiles, as determined by the `find-neighbours!` function.
 (define coords (make-hash))
 
-;; I don't like the way this function is written, but it simplifies things
+;; I don't like using integers for this, but it simplifies things
 ;; in `find-neighbours!` if we treat top, right, bottom, left as integers.
 ;; This function relies on the aforementioned assumption, and calculates
 ;; the coordinates of a point's neighbour given the direction int.
