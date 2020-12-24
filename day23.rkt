@@ -74,12 +74,12 @@
        (loop (hash-ref dict current-cup) (add1 move)))))
   (loop 3 0))
 
-;; The answer to part 1 is a string containing all the digits following
+;; The answer to part 1 is a sequence of all the digits following
 ;; cup number 1 in the hash map.
 (define (part1-answer dict)
   (define (loop curr acc)
     (if (= curr 1)
-        (apply string-append (map number->string (reverse acc)))
+        (string->number (apply string-append (map number->string (reverse acc))))
         (loop (hash-ref dict curr) (cons curr acc))))
   (loop (hash-ref dict 1) '()))
 
