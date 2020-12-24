@@ -46,10 +46,10 @@
       (move point direction))))
 
 ;; We then iterate over the list of final points, collecting the results
-;; into a set representing the coordinates of black tiles (this is also done
+;; into a hash set representing the coordinates of black tiles (this is also done
 ;; with part 2 in mind). If a point already exists in the set, we remove
 ;; it from the set, thus imitating a flip from black to white.
-(define tiles
+(define black-tiles
   (for/fold ((st (set)))
             ((point points))
     (if (set-member? st point)
@@ -57,7 +57,7 @@
         (set-add st point))))
 
 ;; The answer to part 1 is the number of black tiles.
-(set-count tiles)
+(set-count black-tiles)
 
 ;; Part 2
 ;;
@@ -105,7 +105,7 @@
 
 ;; To get the answer to part 2, we run the Game of Life simulation for
 ;; 100 days, and then count the black tiles.
-(for/fold ((st tiles)
+(for/fold ((st black-tiles)
            #:result (set-count st))
           ((_ 100))
   ;; We iterate over the list of all neighbours of all tiles, deduplicated.
