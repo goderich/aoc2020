@@ -41,17 +41,20 @@
 ;; pass the `lst` variable to it directly, but `loop` can still
 ;; access it.
 (define (run-instructions lst)
-  (define (loop acc ran linenum)
+  (define list-len (hash-count lst))
+  (define ran (mutable-seteq))
+  (define (loop acc linenum)
     (cond
-      ((linenum . >= . (hash-count lst)) (success acc))
+      ((linenum . >= . list-len) (success acc))
       ((set-member? ran linenum) (failure acc))
       (else
        (match-define (cons op val) (hash-ref lst linenum))
+       (set-add! ran linenum)
        (match op
-         ("nop" (loop acc (set-add ran linenum) (add1 linenum)))
-         ("acc" (loop (+ acc val) (set-add ran linenum) (add1 linenum)))
-         ("jmp" (loop acc (set-add ran linenum) (+ val linenum)))))))
-  (loop 0 '() 0))
+         ("nop" (loop acc (add1 linenum)))
+         ("acc" (loop (+ acc val) (add1 linenum)))
+         ("jmp" (loop acc (+ val linenum)))))))
+  (loop 0 0))
 
 ;; Part 1
 ;;
@@ -68,11 +71,11 @@
 ;; sets where exactly one "jmp" is changed to "nop" or a "nop"
 ;; to "jmp".
 (define altered-instructions
-  (for/list (((key value) instructions))
+  (for/list (((key value) instructions)
+             #:when (member (car value) '("nop" "jmp")))
     (define new-op (match (car value)
                       ("nop" "jmp")
-                      ("jmp" "nop")
-                      ("acc" "acc")))
+                      ("jmp" "nop")))
     (hash-set instructions key (cons new-op (cdr value)))))
 
 ;; Then it is just a matter of iterating over the list of
